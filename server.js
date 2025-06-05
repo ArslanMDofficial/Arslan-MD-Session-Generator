@@ -2,7 +2,6 @@ const express = require("express");
 const fs = require("fs");
 const pino = require("pino");
 const { default: makeWASocket, useSingleFileAuthState } = require("@whiskeysockets/baileys");
-const { delay } = require("@whiskeysockets/baileys/lib/Utils");
 const app = express();
 const port = process.env.PORT || 8000;
 
@@ -12,7 +11,6 @@ const sessionsDir = "./sessions";
 if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir);
 
 const logger = pino({ level: "silent" });
-const pairingStatus = {};
 
 app.get("/", (req, res) => {
   res.send("✅ ArslanMD Session Generator is running.");
@@ -32,24 +30,16 @@ app.get("/pair", async (req, res) => {
     browser: ['ArslanMD', 'Chrome', '1.0'],
   });
 
-  pairingStatus[number] = false;
-
-  sock.ev.on("connection.update", async (update) => {
-    const { connection, qr, pairingCode, isNewLogin } = update;
-
-    if (pairingCode && !pairingStatus[number]) {
-      pairingStatus[number] = pairingCode;
-      console.log("Pairing code generated:", pairingCode);
-      res.send(pairingCode);
-    }
-
-    if (connection === "open") {
-      await delay(3000);
-      await sock.logout();
-    }
-  });
-
   sock.ev.on("creds.update", saveState);
+
+  try {
+    const code = await sock.requestPairingCode(`${number}@s.whatsapp.net`);
+    console.log("✅ Pairing code generated:", code);
+    res.send(code);
+  } catch (err) {
+    console.error("❌ Error generating code:", err);
+    res.send("❌ Could not generate pairing code.");
+  }
 });
 
 app.get("/getSession", (req, res) => {
