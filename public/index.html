@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+      background: linear-gradient(to right, #141e30, #243b55);
       color: white;
       text-align: center;
       padding: 40px 20px;
@@ -17,12 +17,12 @@
       margin-bottom: 10px;
     }
     .box {
-      background-color: rgba(0,0,0,0.7);
+      background-color: rgba(0, 0, 0, 0.7);
       padding: 30px;
       border-radius: 15px;
-      max-width: 500px;
+      max-width: 520px;
       margin: auto;
-      box-shadow: 0 0 15px #00ffc3;
+      box-shadow: 0 0 20px #00ffc3;
     }
     input[type="text"] {
       padding: 10px;
@@ -44,14 +44,27 @@
     button:hover {
       background-color: #02d3ab;
     }
-    #pairCode, #sessionID {
+    .output {
       margin-top: 15px;
-      background-color: #222;
+      background-color: #111;
       padding: 12px;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 14px;
       word-break: break-word;
       color: #0f0;
+    }
+    .copy-btn {
+      background-color: #333;
+      color: #fff;
+      font-size: 12px;
+      margin-top: 5px;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 12px;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      background-color: #444;
     }
     .link {
       margin-top: 10px;
@@ -74,10 +87,12 @@
     <input type="text" id="numberInput" placeholder="Enter WhatsApp Number (e.g., 923001234567)" />
     <br />
     <button onclick="getPairCode()">🔐 Get Pairing Code</button>
-    <div id="pairCode"></div>
+    <div class="output" id="pairCode"></div>
+    <button class="copy-btn" onclick="copyText('pairCode')">📋 Copy Pairing Code</button>
 
     <button onclick="getSession()">📩 Get Session ID</button>
-    <div id="sessionID"></div>
+    <div class="output" id="sessionID"></div>
+    <button class="copy-btn" onclick="copyText('sessionID')">📋 Copy Session ID</button>
 
     <a href="https://whatsapp.com/channel/0029VarfjW04tRrmwfb8x306" class="link" target="_blank">📢 Join WhatsApp Channel</a>
     <a href="https://github.com/ArslanMDofficial/Arslan-MD" class="link" target="_blank">👨‍💻 View GitHub Repository</a>
@@ -95,7 +110,7 @@
       document.getElementById("pairCode").innerHTML = "⏳ Generating...";
       const res = await fetch(`/pair?number=${number}`);
       const text = await res.text();
-      document.getElementById("pairCode").innerText = "📲 Pairing Code:\n" + text;
+      document.getElementById("pairCode").innerText = text;
     }
 
     async function getSession() {
@@ -104,10 +119,17 @@
         alert("❌ Please enter a valid number first.");
         return;
       }
-      document.getElementById("sessionID").innerHTML = "⏳ Checking session...";
+      document.getElementById("sessionID").innerHTML = "⏳ Fetching...";
       const res = await fetch(`/getSession?number=${number}`);
       const text = await res.text();
-      document.getElementById("sessionID").innerText = "✅ Session:\n" + text;
+      document.getElementById("sessionID").innerText = text;
+    }
+
+    function copyText(id) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("✅ Copied!");
+      });
     }
   </script>
 </body>
